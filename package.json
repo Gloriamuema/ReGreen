@@ -2,9 +2,29 @@
   "dependencies": {
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "lucide-react": "^0.545.0",
     "mysql2": "^3.15.2",
     "react": "^19.2.0"
-  }
+  },
+  "name": "regreen",
+  "version": "1.0.0",
+  "description": "An Ai platform that identifies best area for reforestation and recommends and provides most native tree species for each land type. Regreeen. Combines GIS for mapping ,AI or smart recommendations and dashbard for clear insight",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gloriamuema/ReGreen.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Gloriamuema/ReGreen/issues"
+  },
+  "homepage": "https://github.com/Gloriamuema/ReGreen#readme"
 }
