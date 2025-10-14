@@ -8,20 +8,39 @@ const path = require("path");
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(__dirname)); // serve frontend files
+app.use(express.static(__dirname));
 
-// ✅ MySQL Connection
+// ✅ MySQL connection
 const db = mysql.createConnection({
   host: "localhost",
-  user: "root", // change if different
-  password: "", // your password
-  database: "regreeen_db"
+  user: "root",
+  password: "",
+  database: "regreeen_db",
 });
 
-db.connect(err => {
+db.connect((err) => {
   if (err) throw err;
   console.log("✅ MySQL connected");
 });
+
+// 🌿 Simple AI rule-based tree recommender (you can later plug in real ML)
+function getTreeRecommendation(soil, rainfall) {
+  const rules = [
+    { soil: "loamy", rain: "high", trees: "Prunus Africana, Croton megalocarpus, Markhamia lutea" },
+    { soil: "sandy", rain: "low", trees: "Acacia tortilis, Commiphora africana, Melia volkensii" },
+    { soil: "clay", rain: "moderate", trees: "Syzygium guineense, Terminalia brownie, Grevillea robusta" },
+    { soil: "black cotton", rain: "moderate", trees: "Casuarina equisetifolia, Balanites aegyptiaca" },
+    { soil: "red", rain: "high", trees: "Albizia coriaria, Ficus sycomorus, Croton macrostachyus" },
+  ];
+
+  const match = rules.find(
+    (r) =>
+      soil.toLowerCase().includes(r.soil) &&
+      rainfall.toLowerCase().includes(r.rain)
+  );
+
+  return match ? match.trees : "Grevillea robusta, Acacia xanthophloea";
+}
 
 // 🌍 Fetch all land data
 app.get("/api/recommendations", (req, res) => {
@@ -45,11 +64,18 @@ app.post("/api/lands", (req, res) => {
   });
 });
 
+// 🧠 AI endpoint: Recommend best trees via simple logic or later ML
+app.post("/api/ai-recommend", (req, res) => {
+  const { soil_type, rainfall } = req.body;
+  const recommendation = getTreeRecommendation(soil_type, rainfall);
+  res.json({ recommended_trees: recommendation });
+});
+
 // Serve frontend
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
 app.listen(5000, () => {
-  console.log("🚀 Server running at http://localhost:5000");
+  console.log("🚀 Server running on http://localhost:5000");
 });
