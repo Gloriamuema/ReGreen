@@ -1,44 +1,58 @@
-async function loadParcels() {
-  const res = await fetch("api.php?action=get_parcels");
-  const parcels = await res.json();
-  const tbody = document.querySelector("#parcelTable tbody");
-  tbody.innerHTML = "";
+// script.js
 
-  parcels.forEach(p => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${p.id}</td>
-      <td>${p.name}</td>
-      <td>${p.land_type}</td>
-      <td>${p.rainfall} mm</td>
-      <td>${p.temperature} °C</td>
-      <td><button onclick="recommend(${p.id})">Recommend</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
+// 🌍 Initialize map
+const map = L.map("map").setView([-1.286389, 36.817223], 7); // Kenya default
 
-async function recommend(id) {
-  const res = await fetch(`api.php?action=recommend&id=${id}`);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 18,
+}).addTo(map);
+
+// 📊 Load recommendations
+async function loadRecommendations() {
+  const res = await fetch("http://localhost:5000/api/recommendations");
   const data = await res.json();
-  const div = document.getElementById("recResults");
 
-  if (data.error) {
-    div.innerHTML = `<p style="color:red">${data.error}</p>`;
-    return;
-  }
+  const container = document.getElementById("recommendations");
+  container.innerHTML = "";
 
-  let html = "<table><tr><th>Species</th><th>Type</th><th>Score</th><th>Description</th></tr>";
-  data.forEach(s => {
-    html += `<tr>
-      <td>${s.name}</td>
-      <td>${s.land_type}</td>
-      <td>${s.score}</td>
-      <td>${s.description}</td>
-    </tr>`;
+  data.forEach((item) => {
+    const div = document.createElement("div");
+    div.className =
+      "p-4 border rounded-lg shadow hover:shadow-md transition bg-green-50";
+    div.innerHTML = `
+      <h4 class="text-lg font-bold text-green-800">${item.location_name}</h4>
+      <p>🌱 <strong>Soil:</strong> ${item.soil_type}</p>
+      <p>💧 <strong>Rainfall:</strong> ${item.rainfall}</p>
+      <p>🌳 <strong>Native Trees:</strong> ${item.tree_species}</p>
+    `;
+    container.appendChild(div);
+
+    // Add marker on map
+    L.marker([-1.286389 + Math.random(), 36.817223 + Math.random()])
+      .addTo(map)
+      .bindPopup(`<b>${item.location_name}</b><br>${item.tree_species}`);
   });
-  html += "</table>";
-  div.innerHTML = html;
 }
 
-loadParcels();
+loadRecommendations();
+
+// ➕ Add new land data
+document.getElementById("landForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const location_name = document.getElementById("location").value;
+  const soil_type = document.getElementById("soil").value;
+  const rainfall = document.getElementById("rainfall").value;
+  const tree_species = document.getElementById("trees").value;
+
+  const res = await fetch("http://localhost:5000/api/lands", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ location_name, soil_type, rainfall, tree_species }),
+  });
+
+  const result = await res.json();
+  alert(result.message);
+  loadRecommendations();
+});
+// server.js
