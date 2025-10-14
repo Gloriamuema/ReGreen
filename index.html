@@ -3,28 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Regreeen AI Reforestation Platform</title>
+  <title>Regreeen - AI-GIS Reforestation Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 </head>
-<body>
-  <div class="container">
-    <h1>🌳 Regreeen — AI Reforestation Dashboard</h1>
+<body class="bg-green-50 font-sans">
 
-    <section id="parcels">
-      <h2>Available Land Parcels</h2>
-      <table id="parcelTable">
-        <thead>
-          <tr><th>ID</th><th>Name</th><th>Type</th><th>Rainfall</th><th>Temperature</th><th>Action</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+  <header class="bg-green-700 text-white text-center py-6 text-3xl font-bold shadow-md">
+    🌿 Regreeen: Smart AI + GIS Reforestation Insights
+  </header>
 
-    <section id="recommendations">
-      <h2>Recommended Native Species</h2>
-      <div id="recResults">Select a parcel to see recommendations.</div>
-    </section>
-  </div>
+  <main class="max-w-6xl mx-auto my-8 p-6 bg-white rounded-2xl shadow-lg">
+    <!-- Map -->
+    <h2 class="text-2xl font-semibold mb-2 text-green-700">Select Location on Map</h2>
+    <div id="map" class="h-[400px] mb-6 rounded-xl border"></div>
+
+    <!-- Data Cards -->
+    <h2 class="text-2xl font-semibold mb-4 text-green-700">Reforestation Insights</h2>
+    <div id="recommendations" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+    <!-- Add Form -->
+    <h3 class="text-xl font-semibold mt-8 mb-2 text-green-600">Add New Land Data</h3>
+    <form id="landForm" class="grid gap-3">
+      <input type="text" id="location" placeholder="Location Name" class="border p-2 rounded" required>
+      <input type="text" id="soil" placeholder="Soil Type" class="border p-2 rounded" required>
+      <input type="text" id="rainfall" placeholder="Rainfall Level" class="border p-2 rounded" required>
+      <input type="text" id="trees" placeholder="Recommended Tree Species" class="border p-2 rounded" required>
+      <input type="text" id="lat" placeholder="Latitude (auto)" class="border p-2 rounded bg-gray-100" readonly>
+      <input type="text" id="lng" placeholder="Longitude (auto)" class="border p-2 rounded bg-gray-100" readonly>
+      <button class="bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">Add Land Data</button>
+    </form>
+  </main>
 
   <script src="script.js"></script>
 </body>
