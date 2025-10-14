@@ -46,11 +46,12 @@ async function loadRecommendations() {
 }
 
 loadRecommendations();
-
 // 🧠 AI Recommendation
 document.getElementById("aiBtn").addEventListener("click", async () => {
   const soil_type = document.getElementById("soil").value;
   const rainfall = document.getElementById("rainfall").value;
+  const latitude = document.getElementById("lat").value;
+  const longitude = document.getElementById("lng").value;
 
   if (!soil_type || !rainfall) {
     alert("Please enter soil type and rainfall first.");
@@ -60,12 +61,13 @@ document.getElementById("aiBtn").addEventListener("click", async () => {
   const res = await fetch("http://localhost:5000/api/ai-recommend", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ soil_type, rainfall }),
+    body: JSON.stringify({ soil_type, rainfall, latitude, longitude }),
   });
 
   const data = await res.json();
   document.getElementById("trees").value = data.recommended_trees;
 });
+
 
 // ➕ Save data
 document.getElementById("landForm").addEventListener("submit", async (e) => {

@@ -1,45 +1,61 @@
 // server.js
-const express = require("express");
-const mysql = require("mysql2");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const path = require("path");
+import express from "express";
+import mysql from "mysql2";
+import cors from "cors";
+import bodyParser from "body-parser";
+import path from "path";
+import dotenv from "dotenv";
+import axios from "axios";
+import OpenAI from "openai";
 
+dotenv.config();
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(__dirname));
+app.use(express.static(path.resolve()));
 
-// ✅ MySQL connection
+// ✅ MySQL setup
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "",
   database: "regreeen_db",
 });
-
 db.connect((err) => {
   if (err) throw err;
   console.log("✅ MySQL connected");
 });
 
-// 🌿 Simple AI rule-based tree recommender (you can later plug in real ML)
-function getTreeRecommendation(soil, rainfall) {
-  const rules = [
-    { soil: "loamy", rain: "high", trees: "Prunus Africana, Croton megalocarpus, Markhamia lutea" },
-    { soil: "sandy", rain: "low", trees: "Acacia tortilis, Commiphora africana, Melia volkensii" },
-    { soil: "clay", rain: "moderate", trees: "Syzygium guineense, Terminalia brownie, Grevillea robusta" },
-    { soil: "black cotton", rain: "moderate", trees: "Casuarina equisetifolia, Balanites aegyptiaca" },
-    { soil: "red", rain: "high", trees: "Albizia coriaria, Ficus sycomorus, Croton macrostachyus" },
-  ];
+// 🌿 AI Client setup
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  const match = rules.find(
-    (r) =>
-      soil.toLowerCase().includes(r.soil) &&
-      rainfall.toLowerCase().includes(r.rain)
-  );
+// AI recommendation using OpenAI API
+async function getTreeRecommendationAI(soil, rainfall, lat, lng) {
+  const prompt = `
+You are an expert environmental AI for Kenya reforestation.
+Suggest the most suitable native tree species for reforestation
+based on the following inputs:
 
-  return match ? match.trees : "Grevillea robusta, Acacia xanthophloea";
+Soil Type: ${soil}
+Rainfall: ${rainfall}
+Latitude: ${lat}
+Longitude: ${lng}
+
+Output only a short comma-separated list of native species.
+  `;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const answer = response.choices[0].message.content.trim();
+    return answer || "Grevillea robusta, Croton megalocarpus, Acacia xanthophloea";
+  } catch (error) {
+    console.error("AI API error:", error);
+    return "Grevillea robusta, Acacia xanthophloea";
+  }
 }
 
 // 🌍 Fetch all land data
@@ -64,18 +80,18 @@ app.post("/api/lands", (req, res) => {
   });
 });
 
-// 🧠 AI endpoint: Recommend best trees via simple logic or later ML
-app.post("/api/ai-recommend", (req, res) => {
-  const { soil_type, rainfall } = req.body;
-  const recommendation = getTreeRecommendation(soil_type, rainfall);
-  res.json({ recommended_trees: recommendation });
+// 🧠 AI Recommendation endpoint
+app.post("/api/ai-recommend", async (req, res) => {
+  const { soil_type, rainfall, latitude, longitude } = req.body;
+  const trees = await getTreeRecommendationAI(soil_type, rainfall, latitude, longitude);
+  res.json({ recommended_trees: trees });
 });
 
 // Serve frontend
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(path.resolve(), "index.html"));
 });
 
-app.listen(5000, () => {
-  console.log("🚀 Server running on http://localhost:5000");
+app.listen(process.env.PORT || 5000, () => {
+  console.log(`🚀 Server running at http://localhost:${process.env.PORT || 5000}`);
 });
