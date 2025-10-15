@@ -52,4 +52,51 @@ It combines **geospatial mapping**, **AI-driven environmental insights**, and a 
 ```bash
 git clone https://github.com/Gloriamuema/ReGreen.git
 cd ReGreen
+""
+Install Dependencies
+Make sure you have Node.js and MySQL installed.
+npm install
+
+Create an Environment File
+Create a file named .env in the project root:
+OPENAI_API_KEY=your_openai_api_key_here
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=yourpassword
+DB_NAME=regreen
+PORT=5000
+
+Important: Never commit this .env file. It’s already ignored by .gitignore.
+
+Start the Server
+node server.js
+Open the Frontend
+
+Open index.html in your browser or use a simple live server extension in VS Code.
+
+Example Workflow
+
+Select your region on the map or input coordinates.
+
+Enter rainfall and soil type details.
+
+Click “Get AI Recommendation”.
+
+View tree species suggestions and map visualization.
+Future Improvements
+Integration with satellite imagery APIs for land health analysis
+
+User accounts and saved recommendations
+Mobile-responsive design
+Expanded tree species database per region
+
+
+Inspiration
+Climate change and deforestation are major threats to biodiversity.
+ReGreen leverages AI and GIS to guide smarter, data-driven reforestation decisions that restore ecosystems and promote sustainability.
+
+
+Team
+Developed by Gloria Muema
+PLP Hackathon — Sustainable Tech Innovation Challenge 
 
