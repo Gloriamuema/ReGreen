@@ -47,6 +47,8 @@ It combines **geospatial mapping**, **AI-driven environmental insights**, and a 
 ---
 
 ## ⚙️ Setup Instructions (Local Development)
+# Deployment Link
+https://gloriamuema.github.io/ReGreen/
 
 ### 1️⃣ Clone the Repository
 ```bash
