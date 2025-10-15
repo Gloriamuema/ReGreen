@@ -3,41 +3,83 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Regreeen - Smart AI + GIS Reforestation Platform</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <title>ReGreen | AI & GIS Reforestation Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body class="bg-green-50 font-sans">
 
-  <header class="bg-green-700 text-white text-center py-6 text-3xl font-bold shadow-md">
-    🌿 Regreeen: AI + GIS Reforestation Insights
+  <!-- Header -->
+  <header class="bg-green-700 text-white p-5 text-center text-3xl font-bold shadow-md">
+    🌿 ReGreen — AI & GIS for Smart Reforestation
   </header>
 
-  <main class="max-w-6xl mx-auto my-8 p-6 bg-white rounded-2xl shadow-lg">
+  <!-- Navigation Tabs -->
+  <nav class="flex justify-center flex-wrap mt-4 gap-2">
+    <button class="tab-btn active bg-green-600 text-white px-4 py-2 rounded" data-tab="analysis">Land Analysis</button>
+    <button class="tab-btn bg-gray-300 px-4 py-2 rounded" data-tab="recommendations">AI Recommendations</button>
+    <button class="tab-btn bg-gray-300 px-4 py-2 rounded" data-tab="gis">GIS Insights</button>
+    <button class="tab-btn bg-gray-300 px-4 py-2 rounded" data-tab="dashboard">Data Dashboard</button>
+    <button class="tab-btn bg-gray-300 px-4 py-2 rounded" data-tab="about">About</button>
+  </nav>
 
-    <h2 class="text-2xl font-semibold mb-2 text-green-700">Select Location on Map</h2>
-    <div id="map" class="h-[400px] mb-6 rounded-xl border"></div>
+  <!-- Tabs Content -->
+  <main class="p-6">
 
-    <h2 class="text-2xl font-semibold mb-4 text-green-700">Reforestation Insights</h2>
-    <div id="recommendations" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    <!-- 🟢 Land Analysis Tab -->
+    <section id="analysis" class="tab-content">
+      <h2 class="text-xl font-bold text-green-700 mb-4">🌍 Land & Soil Analysis</h2>
 
-    <h3 class="text-xl font-semibold mt-8 mb-2 text-green-600">Add New Land Data</h3>
-    <form id="landForm" class="grid gap-3">
-      <input type="text" id="location" placeholder="Location Name" class="border p-2 rounded" required>
-      <input type="text" id="soil" placeholder="Soil Type (e.g. Loamy, Sandy)" class="border p-2 rounded" required>
-      <input type="text" id="rainfall" placeholder="Rainfall Level (Low, Moderate, High)" class="border p-2 rounded" required>
+      <div id="map" class="w-full h-96 rounded shadow mb-4"></div>
 
-      <div class="flex gap-2">
-        <input type="text" id="trees" placeholder="AI Recommended Trees" class="border p-2 rounded flex-grow" readonly>
-        <button id="aiBtn" type="button" class="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700">AI Suggest</button>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <input type="text" id="soil" placeholder="Soil Type (e.g. Clay, Loam)" class="border p-2 rounded" />
+        <input type="number" id="rainfall" placeholder="Average Rainfall (mm)" class="border p-2 rounded" />
+        <input type="text" id="lat" placeholder="Latitude" class="border p-2 rounded" />
+        <input type="text" id="lng" placeholder="Longitude" class="border p-2 rounded" />
       </div>
 
-      <input type="text" id="lat" placeholder="Latitude (auto)" class="border p-2 rounded bg-gray-100" readonly>
-      <input type="text" id="lng" placeholder="Longitude (auto)" class="border p-2 rounded bg-gray-100" readonly>
-      <button class="bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">Save Land Data</button>
-    </form>
+      <button id="aiBtn" class="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-800">
+        Analyze & Get Recommendations 🌱
+      </button>
+    </section>
+
+    <!-- 🌳 Recommendations Tab -->
+    <section id="recommendations" class="tab-content hidden">
+      <h2 class="text-xl font-bold text-green-700 mb-4">🌳 Recommended Native Tree Species</h2>
+      <textarea id="trees" readonly class="w-full h-64 p-3 border rounded bg-gray-50"></textarea>
+    </section>
+
+    <!-- 🛰️ GIS Insights Tab -->
+    <section id="gis" class="tab-content hidden">
+      <h2 class="text-xl font-bold text-green-700 mb-4">🛰️ GIS-Based Environmental Insights</h2>
+      <p class="text-gray-700 mb-2">Visualize the selected location and nearby vegetation cover.</p>
+      <div id="gis-map" class="w-full h-96 border rounded shadow"></div>
+    </section>
+
+    <!-- 📊 Data Dashboard Tab -->
+    <section id="dashboard" class="tab-content hidden">
+      <h2 class="text-xl font-bold text-green-700 mb-4">📊 Environmental Data Dashboard</h2>
+      <canvas id="rainChart" class="w-full h-64"></canvas>
+      <canvas id="soilChart" class="w-full h-64 mt-8"></canvas>
+    </section>
+
+    <!-- ℹ️ About Tab -->
+    <section id="about" class="tab-content hidden">
+      <h2 class="text-xl font-bold text-green-700 mb-4">ℹ️ About ReGreen</h2>
+      <p class="text-gray-700 mb-2">
+        ReGreen is an AI-powered sustainability tool that identifies the best areas for reforestation
+        using data on soil type, rainfall, and geographical coordinates. It combines
+        Artificial Intelligence (AI), Geographic Information Systems (GIS), and real-time data analytics
+        to support smart, region-specific tree planting.
+      </p>
+      <p class="text-gray-700">Developed by <strong>Gloria Muema</strong> for the PLP Hackathon.</p>
+    </section>
+
   </main>
 
   <script src="script.js"></script>

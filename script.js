@@ -1,79 +1,46 @@
-// script.js
-
-// 🌍 Initialize the map (centered on Kenya)
-const map = L.map("map").setView([-0.0236, 37.9062], 6);
-
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 18,
-  attribution: "&copy; OpenStreetMap contributors",
+// --- Leaflet Map for Analysis ---
+const map = L.map('map').setView([0.0236, 37.9062], 6); // Default Kenya
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-let selectedMarker = null;
-
-// 📍 Capture user click on map to get coordinates
-map.on("click", function (e) {
+let marker;
+map.on('click', function (e) {
   const { lat, lng } = e.latlng;
-  document.getElementById("lat").value = lat.toFixed(6);
-  document.getElementById("lng").value = lng.toFixed(6);
-
-  if (selectedMarker) {
-    map.removeLayer(selectedMarker);
-  }
-
-  selectedMarker = L.marker([lat, lng])
-    .addTo(map)
-    .bindPopup(`📍 Selected Location<br>${lat.toFixed(4)}, ${lng.toFixed(4)}`)
-    .openPopup();
+  document.getElementById("lat").value = lat.toFixed(5);
+  document.getElementById("lng").value = lng.toFixed(5);
+  if (marker) map.removeLayer(marker);
+  marker = L.marker([lat, lng]).addTo(map);
 });
 
-// 🌿 Load saved land data and show on map + dashboard
-async function loadRecommendations() {
-  try {
-    const res = await fetch("http://localhost:5000/api/recommendations");
-    const data = await res.json();
+// --- GIS Map for Insights ---
+const gisMap = L.map('gis-map').setView([0.0236, 37.9062], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap'
+}).addTo(gisMap);
 
-    const container = document.getElementById("recommendations");
-    container.innerHTML = "";
+// --- Tab Navigation ---
+const tabs = document.querySelectorAll(".tab-btn");
+const contents = document.querySelectorAll(".tab-content");
 
-    data.forEach((item) => {
-      // Create info cards
-      const div = document.createElement("div");
-      div.className =
-        "p-4 border rounded-lg shadow hover:shadow-md transition bg-green-50";
-      div.innerHTML = `
-        <h4 class="text-lg font-bold text-green-800">${item.location_name}</h4>
-        <p>🌱 <b>Soil:</b> ${item.soil_type}</p>
-        <p>💧 <b>Rainfall:</b> ${item.rainfall}</p>
-        <p>🌳 <b>Trees:</b> ${item.tree_species}</p>
-      `;
-      container.appendChild(div);
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    tabs.forEach(t => t.classList.remove("active", "bg-green-600", "text-white"));
+    tab.classList.add("active", "bg-green-600", "text-white");
+    contents.forEach(c => c.classList.add("hidden"));
+    document.getElementById(tab.dataset.tab).classList.remove("hidden");
+  });
+});
 
-      // Add markers to map
-      if (item.latitude && item.longitude) {
-        L.marker([item.latitude, item.longitude])
-          .addTo(map)
-          .bindPopup(
-            `<b>${item.location_name}</b><br>🌱 ${item.soil_type}<br>🌳 ${item.tree_species}`
-          );
-      }
-    });
-  } catch (error) {
-    console.error("Error loading data:", error);
-  }
-}
-
-// Load data on startup
-loadRecommendations();
-
-// 🧠 AI Recommendation (now includes lat/lng)
+// --- AI Recommendation API Call ---
 document.getElementById("aiBtn").addEventListener("click", async () => {
   const soil_type = document.getElementById("soil").value;
   const rainfall = document.getElementById("rainfall").value;
   const latitude = document.getElementById("lat").value;
   const longitude = document.getElementById("lng").value;
 
-  if (!soil_type || !rainfall) {
-    alert("Please enter soil type and rainfall first.");
+  if (!soil_type || !rainfall || !latitude || !longitude) {
+    alert("Please fill in all fields before analysis.");
     return;
   }
 
@@ -85,49 +52,39 @@ document.getElementById("aiBtn").addEventListener("click", async () => {
     });
 
     const data = await res.json();
-
-    // Fill recommended tree list into input field
-    document.getElementById("trees").value = data.recommended_trees;
-
-    // Show toast or alert with recommendation
-    alert(`🌳 AI Recommended Trees: ${data.recommended_trees}`);
-  } catch (error) {
-    console.error("AI recommendation error:", error);
-    alert("Failed to fetch AI recommendation. Please check server.");
+    if (data.recommended_trees) {
+      document.getElementById("trees").value = data.recommended_trees;
+      alert("✅ Analysis complete! Check the Recommendations tab.");
+    } else {
+      alert("❌ Unable to get recommendation. Check your backend or API key.");
+    }
+  } catch (err) {
+    console.error("Error:", err);
+    alert("⚠️ Could not connect to backend. Ensure the server is running.");
   }
 });
 
-// ➕ Save new land record
-document
-  .getElementById("landForm")
-  .addEventListener("submit", async (e) => {
-    e.preventDefault();
+// --- Charts for Dashboard ---
+const rainCtx = document.getElementById('rainChart').getContext('2d');
+new Chart(rainCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Nairobi', 'Mombasa', 'Kisumu', 'Eldoret', 'Nakuru'],
+    datasets: [{
+      label: 'Average Rainfall (mm)',
+      data: [890, 1200, 1450, 1300, 1100],
+    }]
+  }
+});
 
-    const body = {
-      location_name: document.getElementById("location").value,
-      soil_type: document.getElementById("soil").value,
-      rainfall: document.getElementById("rainfall").value,
-      tree_species: document.getElementById("trees").value,
-      latitude: document.getElementById("lat").value,
-      longitude: document.getElementById("lng").value,
-    };
-
-    try {
-      const res = await fetch("http://localhost:5000/api/lands", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      const result = await res.json();
-      alert(result.message);
-
-      // Reset form and reload data
-      document.getElementById("landForm").reset();
-      loadRecommendations();
-    } catch (error) {
-      console.error("Error saving land data:", error);
-      alert("Error saving data. Check connection or backend.");
-    }
-  });
-// server.js
+const soilCtx = document.getElementById('soilChart').getContext('2d');
+new Chart(soilCtx, {
+  type: 'pie',
+  data: {
+    labels: ['Clay', 'Loam', 'Sandy', 'Silt'],
+    datasets: [{
+      label: 'Soil Type Distribution',
+      data: [35, 40, 15, 10],
+    }]
+  }
+});
